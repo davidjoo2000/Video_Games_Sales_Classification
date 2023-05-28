@@ -105,4 +105,36 @@ def main():
     publisher = form.selectbox('Publisher', data['Publisher'].unique())
     developer = form.selectbox('Developer', data['Developer'].unique())
     critic_score = form.number_input('Critic Score', min_value=0, max_value=100, step=1)
-    user_score = form.number_input('User Score', min_value=0.
+    user_score = form.number_input('User Score', min_value=0.0, max_value=10.0, step=0.1)
+    rating = form.selectbox('Rating', data['Rating'].unique())
+
+    submit_button = form.form_submit_button(label='Predict')
+
+    if submit_button:
+        # Create a DataFrame from the user input
+        input_df = pd.DataFrame([[name, platform, year_of_release, genre, publisher, developer, critic_score, user_score, rating]],
+                                columns=['Name', 'Platform', 'Year_of_Release', 'Genre', 'Publisher', 'Developer', 'Critic_Score', 'User_Score', 'Rating'])
+
+        # Make predictions using all models
+        rf_prediction = predict_rf(input_df)
+        svm_prediction = predict_svm(input_df)
+        lr_prediction = predict_lr(input_df)
+        fnn_prediction = predict_fnn(input_df)
+
+        st.header('Predictions')
+
+        st.subheader('Random Forest Classifier Prediction')
+        st.write(rf_prediction)
+
+        st.subheader('SVM Classifier Prediction')
+        st.write(svm_prediction)
+
+        st.subheader('Logistic Regression Classifier Prediction')
+        st.write(lr_prediction)
+
+        st.subheader('FNN Classifier Prediction')
+        st.write(fnn_prediction)
+
+# Run the Streamlit app
+if __name__ == '__main__':
+    main()
