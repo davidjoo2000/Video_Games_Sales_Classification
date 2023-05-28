@@ -5,10 +5,8 @@ import pickle
 import tensorflow as tf
 from tensorflow.keras.models import load_model
 
-# Load the preprocessed data
-data = pd.read_csv('preprocessed_data.csv')
+data = pd.read_csv('Video_Games_Sales_as_at_22_Dec_2016.csv')
 
-# Load the trained models
 with open('random_forest_model.pkl', 'rb') as f:
     rf_model = pickle.load(f)
 
@@ -18,77 +16,70 @@ with open('svm_model.pkl', 'rb') as f:
 with open('logistic_regression_model.pkl', 'rb') as f:
     lr_model = pickle.load(f)
 
-fnn_model = load_model('fnn_model.h5')
+with open('voting_classifier','rb') as f:
+    voting_model = pickle.load(f)
 
-# Load the label encoder
+with open('stacking_model.pkl','rb') as f:
+    stacking_model = pickle.load(f)
+
+with open('adaboosting_model','rb') as f:
+    adaboosting_model = pickle.load(f)
+
 with open('label_encoder.pkl', 'rb') as f:
     label_encoder = pickle.load(f)
 
-# Function to preprocess the input data
+
 def preprocess_data(df):
-    # Perform the same preprocessing steps as in the notebook
     df['Rating'] = label_encoder.transform(df['Rating'])
     df['Platform'] = label_encoder.transform(df['Platform'])
     df['Publisher'] = label_encoder.transform(df['Publisher'])
     df['Developer'] = label_encoder.transform(df['Developer'])
 
-    # Standardize the features
     scaler = StandardScaler()
     df = scaler.fit_transform(df)
 
     return df
-
-# Function to make predictions using the RandomForest model
 def predict_rf(input_data):
-    # Preprocess the input data
     input_data = preprocess_data(input_data)
-
-    # Make predictions
     predictions = rf_model.predict(input_data)
-
-    # Convert predictions back to original labels
     genre_predictions = label_encoder.inverse_transform(predictions)
 
     return genre_predictions
-
-# Function to make predictions using the SVM model
 def predict_svm(input_data):
-    # Preprocess the input data
     input_data = preprocess_data(input_data)
-
-    # Make predictions
     predictions = svm_model.predict(input_data)
-
-    # Convert predictions back to original labels
     genre_predictions = label_encoder.inverse_transform(predictions)
 
     return genre_predictions
 
-# Function to make predictions using the Logistic Regression model
 def predict_lr(input_data):
-    # Preprocess the input data
     input_data = preprocess_data(input_data)
-
-    # Make predictions
     predictions = lr_model.predict(input_data)
-
-    # Convert predictions back to original labels
     genre_predictions = label_encoder.inverse_transform(predictions)
 
     return genre_predictions
 
-# Function to make predictions using the FNN model
-def predict_fnn(input_data):
-    # Preprocess the input data
+def predict_voting(input_data):
     input_data = preprocess_data(input_data)
-
-    # Make predictions
-    predictions = fnn_model.predict(input_data)
-
-    # Convert predictions to genre labels
-    genre_predictions = label_encoder.inverse_transform(predictions.argmax(axis=1))
+    predictions = voting_model.predict(input_data)
+    genre_predictions = label_encoder.inverse_transform(predictions)
 
     return genre_predictions
+
+def predict_stacking(input_data):
+    input_data = preprocess_data(input_data)
+    predictions = stacking_model.predict(input_data)
+    genre_predictions = label_encoder.inverse_transform(predictions)
+
+    return genre_predictions
+
+def predict_ada(input_data):
+    input_data = preprocess_data(input_data)
+    predictions = adaboosting_model.predict(input_data)
+    genre_predictions = label_encoder.inverse_transform(predictions)
+
+    return genre_predictions
+
 
 # Streamlit app
 def main():
