@@ -1,0 +1,1 @@
+Az a terv RFC SVM es Logistic => feature importance(osztalyozonkent kulon feature) => hyperparameterezes
