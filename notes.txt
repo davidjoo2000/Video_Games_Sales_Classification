@@ -1,1 +1,18 @@
 Az a terv RFC SVM es Logistic => feature importance(osztalyozonkent kulon feature) => hyperparameterezes
+Action -> 0
+Adventure -> 1
+Fighting -> 2
+Misc -> 3
+Platform -> 4
+Puzzle -> 5
+Racing -> 6
+Role-Playing -> 7
+Shooter -> 8
+Simulation -> 9
+Sports -> 10
+Strategy -> 11
+
+label_mapping = dict(zip(label_encoder.classes_, label_encoder.transform(label_encoder.classes_)))
+
+for genre, encoded_genre in label_mapping.items():
+    print(f"{genre} -> {encoded_genre}")
