@@ -2,10 +2,12 @@ import streamlit as st
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 import pickle
+import numpy as np
 import tensorflow as tf
 from tensorflow.keras.models import load_model
 
 data = pd.read_csv('Video_Games_Sales_as_at_22_Dec_2016.csv')
+original_data = data
 data = data.dropna()
 
 data['Year_of_Release'] = data['Year_of_Release'].astype(int)
@@ -37,8 +39,6 @@ with open('voting_classifier.pkl', 'rb') as f:
 with open('stacking_model.pkl', 'rb') as f:
     stacking_model = pickle.load(f)
 
-with open('Ada_classifier.pkl', 'rb') as f:
-    adaboosting_model = pickle.load(f)
 
 with open('encoder_developer.pkl', 'rb') as f:
     encoder_developer = pickle.load(f)
@@ -92,35 +92,43 @@ def predict_stacking(input_data):
 
     return genre_predictions
 
-def predict_ada(input_data):
-    input_data = preprocess_data(input_data)
-    predictions = adaboosting_model.predict(input_data)
-    genre_predictions = encoder_y.inverse_transform(predictions)
-
-    return genre_predictions
 
 # Streamlit app
 def main():
     st.title('Video Game Genre Prediction')
+    st.header('The original table')
+    st.write(original_data)
+    
+    st.sidebar.title('Prediction')
+    form = st.sidebar.form(key='input_form')
+    
+    platform_options = data['Platform'].unique()
+    platform = form.selectbox('Platform', platform_options)
 
-    # Create a form for user input
-    st.header('Input Data')
-    form = st.form(key='input_form')
-
-    platform = form.selectbox('Platform', data['Platform'].unique())
     year_of_release = form.number_input('Year of Release', min_value=1950, max_value=2023, step=1)
-    #genre = form.selectbox('Genre', data['Genre'].unique())
-    publisher = form.selectbox('Publisher', data['Publisher'].unique())
-    developer = form.selectbox('Developer', data['Developer'].unique())
-    critic_score = form.number_input('Critic Score', min_value=0, max_value=100, step=1)
-    user_score = form.number_input('User Score', min_value=0.0, max_value=10.0, step=0.1)
-    rating = form.selectbox('Rating', data['Rating'].unique())
-    na_sales = form.number_input('NA Sales',min_value=0, max_value=5000, step=100)
-    eu_sales = form.number_input('EU Sales',min_value=0, max_value=5000, step=100)
-    critic_count = form.number_input('Cricic count',min_value=0, max_value=100, step=1)
-    user_count = form.number_input('User Count',min_value=0, max_value=100, step=1)
-    submit_button = form.form_submit_button(label='Predict')
 
+    publisher_options = data['Publisher'].unique()
+    publisher = form.selectbox('Publisher', publisher_options)
+
+    developer_options = data['Developer'].unique()
+    developer = form.selectbox('Developer', developer_options)
+
+    critic_score = form.number_input('Critic Score', min_value=0, max_value=100, step=1)
+
+    user_score = form.number_input('User Score', min_value=0.0, max_value=10.0, step=0.1)
+
+    rating_options = data['Rating'].unique()
+    rating = form.selectbox('Rating', rating_options)
+
+    na_sales = form.number_input('NA Sales', min_value=0, max_value=5000, step=100)
+
+    eu_sales = form.number_input('EU Sales', min_value=0, max_value=5000, step=100)
+
+    critic_count = form.number_input('Critic count', min_value=0, max_value=100, step=1)
+
+    user_count = form.number_input('User Count', min_value=0, max_value=100, step=1)
+
+    submit_button = form.form_submit_button(label='Predict')
     if submit_button:
         global_sales=na_sales+eu_sales
         # Create a DataFrame from the user input
@@ -130,21 +138,18 @@ def main():
         # Make predictions using all models
         preprocessed_data = preprocess_data(input_df)
         rf_prediction = predict_rf(preprocessed_data)
-
         svm_prediction = predict_svm(preprocessed_data)
-
         lr_prediction = predict_lr(preprocessed_data)
+        voting_prediction = predict_voting(preprocessed_data)
+        stacking_prediction = predict_stacking(preprocessed_data)
 
         st.header('Predictions')
+        predictions={
+            'Model': ['Random Forest', 'SVM', 'Logistic Regression', 'Voting Ensemble', 'Stacking'],
+            'Prediction': [rf_prediction[0], svm_prediction[0], lr_prediction[0], voting_prediction[0], stacking_prediction[0]]
 
-        st.subheader('Random Forest Classifier Prediction')
-        st.write(rf_prediction)
-
-        st.subheader('SVM Classifier Prediction')
-        st.write(svm_prediction)
-
-        st.subheader('Logistic Regression Classifier Prediction')
-        st.write(lr_prediction)
+        }
+        st.table(predictions)
 
 # Run the Streamlit app
 if __name__ == '__main__':
