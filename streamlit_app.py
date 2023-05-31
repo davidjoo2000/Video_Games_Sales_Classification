@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-from sklearn.preprocessing import StandardScaler
 import pickle
 import numpy as np
 import tensorflow as tf
@@ -24,31 +23,31 @@ data = data.drop(['Other_Sales'], axis=1)
 data = data.drop(['JP_Sales'], axis=1)
 data = data.drop(['Name'], axis=1)
 
-with open('random_forest_model.pkl', 'rb') as f:
+with open('pickle\\random_forest_model.pkl', 'rb') as f:
     rf_model = pickle.load(f)
 
-with open('svm_model.pkl', 'rb') as f:
+with open('pickle\\svm_model.pkl', 'rb') as f:
     svm_model = pickle.load(f)
 
-with open('logistic_regression_model.pkl', 'rb') as f:
+with open('pickle\\logistic_regression_model.pkl', 'rb') as f:
     lr_model = pickle.load(f)
 
-with open('voting_classifier.pkl', 'rb') as f:
+with open('pickle\\voting_classifier.pkl', 'rb') as f:
     voting_model = pickle.load(f)
 
-with open('stacking_model.pkl', 'rb') as f:
+with open('pickle\\stacking_model.pkl', 'rb') as f:
     stacking_model = pickle.load(f)
 
 
-with open('encoder_developer.pkl', 'rb') as f:
+with open('pickle\\encoder_developer.pkl', 'rb') as f:
     encoder_developer = pickle.load(f)
-with open('encoder_platform.pkl', 'rb') as f:
+with open('pickle\\encoder_platform.pkl', 'rb') as f:
     encoder_platform = pickle.load(f)
-with open('encoder_publisher.pkl', 'rb') as f:
+with open('pickle\\encoder_publisher.pkl', 'rb') as f:
     encoder_publisher = pickle.load(f)
-with open('encoder_rating.pkl', 'rb') as f:
+with open('pickle\\encoder_rating.pkl', 'rb') as f:
     encoder_rating = pickle.load(f)
-with open('encoder_y.pkl', 'rb') as f:
+with open('pickle\\encoder_y.pkl', 'rb') as f:
     encoder_y = pickle.load(f)
 
 def preprocess_data(df):
