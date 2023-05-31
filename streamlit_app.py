@@ -1,9 +1,6 @@
 import streamlit as st
 import pandas as pd
 import pickle
-import numpy as np
-import tensorflow as tf
-from tensorflow.keras.models import load_model
 
 data = pd.read_csv('Video_Games_Sales_as_at_22_Dec_2016.csv')
 original_data = data
