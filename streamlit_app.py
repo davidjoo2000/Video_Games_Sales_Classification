@@ -20,7 +20,7 @@ data = data.drop(['Other_Sales'], axis=1)
 data = data.drop(['JP_Sales'], axis=1)
 data = data.drop(['Name'], axis=1)
 
-with open('/pickle/random_forest_model.pkl', 'rb') as f:
+with open('pickle/random_forest_model.pkl', 'rb') as f:
     rf_model = pickle.load(f)
 
 with open('pickle/svm_model.pkl', 'rb') as f:
