@@ -52,52 +52,41 @@ with open('encoder_y.pkl', 'rb') as f:
     encoder_y = pickle.load(f)
 
 def preprocess_data(df):
-    out_df = df
-    out_df['Rating'] = encoder_rating.transform(out_df['Rating'])
-    out_df['Platform'] = encoder_platform.transform(out_df['Platform'])
-    out_df['Publisher'] = encoder_publisher.transform(out_df['Publisher'])
-    out_df['Developer'] = encoder_developer.transform(out_df['Developer'])
+    df
+    df['Rating'] = encoder_rating.transform(df['Rating'])
+    df['Platform'] = encoder_platform.transform(df['Platform'])
+    df['Publisher'] = encoder_publisher.transform(df['Publisher'])
+    df['Developer'] = encoder_developer.transform(df['Developer'])
     #df['Genre'] = encoder_y.transform(df['Genre'])
     
-    return out_df
+    return df
 
 def predict_rf(input_data):
-    st.write("RF")
-    st.write(input_data)
 
-    input_data = preprocess_data(input_data)
     predictions = rf_model.predict(input_data)
     genre_predictions = encoder_y.inverse_transform(predictions)
-    
-    st.write("after RF")
-    st.write(input_data)
+
     return genre_predictions
 
 def predict_svm(input_data):
-    st.write("SVM")
-    st.write(input_data)
-    input_data = preprocess_data(input_data)
     predictions = svm_model.predict(input_data)
     genre_predictions = encoder_y.inverse_transform(predictions)
 
     return genre_predictions
 
 def predict_lr(input_data):
-    input_data = preprocess_data(input_data)
     predictions = lr_model.predict(input_data)
     genre_predictions = encoder_y.inverse_transform(predictions)
 
     return genre_predictions
 
 def predict_voting(input_data):
-    input_data = preprocess_data(input_data)
     predictions = voting_model.predict(input_data)
     genre_predictions = encoder_y.inverse_transform(predictions)
 
     return genre_predictions
 
 def predict_stacking(input_data):
-    input_data = preprocess_data(input_data)
     predictions = stacking_model.predict(input_data)
     genre_predictions = encoder_y.inverse_transform(predictions)
 
@@ -139,10 +128,12 @@ def main():
                                 columns=['Platform', 'Year_of_Release', 'Publisher','NA_Sales','EU_Sales', 'Global_Sales', 'Critic_Score','Critic_Count', 'User_Score','User_Count', 'Developer','Rating'])
 
         # Make predictions using all models
+        preprocessed_data = preprocess_data(input_df)
+        rf_prediction = predict_rf(preprocessed_data)
 
-        rf_prediction = predict_rf(input_df)
-        svm_prediction = predict_svm(input_df)
-        lr_prediction = predict_lr(input_df)
+        svm_prediction = predict_svm(preprocessed_data)
+
+        lr_prediction = predict_lr(preprocessed_data)
 
         st.header('Predictions')
 
