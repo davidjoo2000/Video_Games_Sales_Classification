@@ -37,23 +37,25 @@ with open('pickle/stacking_model.pkl', 'rb') as f:
     stacking_model = pickle.load(f)
 
 
-with open('pickle/encoder_developer.pkl', 'rb') as f:
-    encoder_developer = pickle.load(f)
-with open('pickle/encoder_platform.pkl', 'rb') as f:
-    encoder_platform = pickle.load(f)
-with open('pickle/encoder_publisher.pkl', 'rb') as f:
-    encoder_publisher = pickle.load(f)
-with open('pickle/encoder_rating.pkl', 'rb') as f:
-    encoder_rating = pickle.load(f)
-with open('pickle/encoder_y.pkl', 'rb') as f:
-    encoder_y = pickle.load(f)
+# with open('pickle/encoder_developer.pkl', 'rb') as f:
+#     encoder_developer = pickle.load(f)
+# with open('pickle/encoder_platform.pkl', 'rb') as f:
+#     encoder_platform = pickle.load(f)
+# with open('pickle/encoder_publisher.pkl', 'rb') as f:
+#     encoder_publisher = pickle.load(f)
+# with open('pickle/encoder_rating.pkl', 'rb') as f:
+#     encoder_rating = pickle.load(f)
+# with open('pickle/encoder_y.pkl', 'rb') as f:
+#     encoder_y = pickle.load(f)
+with open('label_encoders.pkl','rb') as f:
+    label_encoder = pickle.load(f)
 
 def preprocess_data(df):
     df
-    df['Rating'] = encoder_rating.transform(df['Rating'])
-    df['Platform'] = encoder_platform.transform(df['Platform'])
-    df['Publisher'] = encoder_publisher.transform(df['Publisher'])
-    df['Developer'] = encoder_developer.transform(df['Developer'])
+    df['Rating'] = label_encoder['Rating'].transform(df['Rating'])
+    df['Platform'] = label_encoder['Platform'].transform(df['Platform'])
+    df['Publisher'] = label_encoder['Publisher'].transform(df['Publisher'])
+    df['Developer'] = label_encoder['Developer'].transform(df['Developer'])
     #df['Genre'] = encoder_y.transform(df['Genre'])
     
     return df
@@ -61,31 +63,31 @@ def preprocess_data(df):
 def predict_rf(input_data):
 
     predictions = rf_model.predict(input_data)
-    genre_predictions = encoder_y.inverse_transform(predictions)
+    genre_predictions = label_encoder['Genre'].inverse_transform(predictions)
 
     return genre_predictions
 
 def predict_svm(input_data):
     predictions = svm_model.predict(input_data)
-    genre_predictions = encoder_y.inverse_transform(predictions)
+    genre_predictions = label_encoder['Genre'].inverse_transform(predictions)
 
     return genre_predictions
 
 def predict_lr(input_data):
     predictions = lr_model.predict(input_data)
-    genre_predictions = encoder_y.inverse_transform(predictions)
+    genre_predictions = label_encoder['Genre'].inverse_transform(predictions)
 
     return genre_predictions
 
 def predict_voting(input_data):
     predictions = voting_model.predict(input_data)
-    genre_predictions = encoder_y.inverse_transform(predictions)
+    genre_predictions = label_encoder['Genre'].inverse_transform(predictions)
 
     return genre_predictions
 
 def predict_stacking(input_data):
     predictions = stacking_model.predict(input_data)
-    genre_predictions = encoder_y.inverse_transform(predictions)
+    genre_predictions = label_encoder['Genre'].inverse_transform(predictions)
 
     return genre_predictions
 
@@ -112,7 +114,7 @@ def main():
 
     critic_score = form.number_input('Critic Score', min_value=0, max_value=100, step=1)
 
-    user_score = form.number_input('User Score', min_value=0.0, max_value=10.0, step=0.1)
+    user_score = form.number_input('User Score', min_value=0, max_value=100, step=1)
 
     rating_options = data['Rating'].unique()
     rating = form.selectbox('Rating', rating_options)
