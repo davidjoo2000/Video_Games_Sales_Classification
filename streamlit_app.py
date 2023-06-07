@@ -35,7 +35,8 @@ with open('pickle/voting_classifier.pkl', 'rb') as f:
 
 with open('pickle/stacking_model.pkl', 'rb') as f:
     stacking_model = pickle.load(f)
-
+with open('pickle/sajat_model.pkl', 'rb') as f:
+    sajat = pickle.load(f)
 
 # with open('pickle/encoder_developer.pkl', 'rb') as f:
 #     encoder_developer = pickle.load(f)
@@ -49,7 +50,7 @@ with open('pickle/stacking_model.pkl', 'rb') as f:
 #     encoder_y = pickle.load(f)
 with open('label_encoders.pkl','rb') as f:
     label_encoder = pickle.load(f)
-
+from sklearn.preprocessing import RobustScaler
 def preprocess_data(df):
     df
     df['Rating'] = label_encoder['Rating'].transform(df['Rating'])
@@ -57,7 +58,9 @@ def preprocess_data(df):
     df['Publisher'] = label_encoder['Publisher'].transform(df['Publisher'])
     df['Developer'] = label_encoder['Developer'].transform(df['Developer'])
     #df['Genre'] = encoder_y.transform(df['Genre'])
-    
+    scaler = RobustScaler()
+    df = scaler.fit_transform(df)   
+
     return df
 
 def predict_rf(input_data):
@@ -88,6 +91,11 @@ def predict_voting(input_data):
 def predict_stacking(input_data):
     predictions = stacking_model.predict(input_data)
     genre_predictions = label_encoder['Genre'].inverse_transform(predictions)
+
+    return genre_predictions
+def predict_sajat(input_data):
+    predictions = sajat.predict(input_data)
+    genre_predictions = label_encoder['Genre'].inverse_transform(np.argmax(predictions, axis=1))
 
     return genre_predictions
 
@@ -123,16 +131,20 @@ def main():
 
     eu_sales = form.number_input('EU Sales', min_value=0, max_value=5000, step=100)
 
+    jp_sales = form.number_input('JP Sales', min_value=0, max_value=5000, step=100)
+
+    other_sales = form.number_input('Other Sales', min_value=0, max_value=5000, step=100)
+
     critic_count = form.number_input('Critic count', min_value=0, max_value=100, step=1)
 
     user_count = form.number_input('User Count', min_value=0, max_value=100, step=1)
 
     submit_button = form.form_submit_button(label='Predict')
     if submit_button:
-        global_sales=na_sales+eu_sales
+        global_sales=na_sales+eu_sales+other_sales+jp_sales
         # Create a DataFrame from the user input
-        input_df = pd.DataFrame([[platform, year_of_release, publisher, na_sales,eu_sales,global_sales, critic_score,critic_count, user_score,user_count,developer, rating]],
-                                columns=['Platform', 'Year_of_Release', 'Publisher','NA_Sales','EU_Sales', 'Global_Sales', 'Critic_Score','Critic_Count', 'User_Score','User_Count', 'Developer','Rating'])
+        input_df = pd.DataFrame([[platform, year_of_release, publisher, na_sales,eu_sales,jp_sales,other_sales,global_sales, critic_score,critic_count, user_score,user_count,developer, rating]],
+                                columns=['Platform', 'Year_of_Release', 'Publisher','NA_Sales','EU_Sales', 'JP_Sales','Other_Sales','Global_Sales', 'Critic_Score','Critic_Count', 'User_Score','User_Count', 'Developer','Rating'])
 
         # Make predictions using all models
         preprocessed_data = preprocess_data(input_df)
@@ -141,11 +153,13 @@ def main():
         lr_prediction = predict_lr(preprocessed_data)
         voting_prediction = predict_voting(preprocessed_data)
         stacking_prediction = predict_stacking(preprocessed_data)
+        sajat_prediction = predict_sajat(preprocessed_data)
+
 
         st.header('Predictions')
         predictions={
-            'Model': ['Random Forest', 'SVM', 'Logistic Regression', 'Voting Ensemble', 'Stacking'],
-            'Prediction': [rf_prediction[0], svm_prediction[0], lr_prediction[0], voting_prediction[0], stacking_prediction[0]]
+            'Model': ['Random Forest', 'SVM', 'Logistic Regression', 'Voting Ensemble', 'Stacking','Sajat'],
+            'Prediction': [rf_prediction[0], svm_prediction[0], lr_prediction[0], voting_prediction[0], stacking_prediction[0],sajat_prediction[0]]
 
         }
         st.table(predictions)
